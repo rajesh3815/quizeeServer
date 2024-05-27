@@ -10,6 +10,7 @@ const {
   getQuizeDetailbyid,
   setImpressins,
   getTrendingQuize,
+  setAnalytics,
 } = require("../controller/quize");
 const quizeRouter = express.Router();
 
@@ -21,5 +22,6 @@ quizeRouter.get("/getQuizebyid/:id", verifyToken, getQuizebyid);
 quizeRouter.delete("/deleteQuize/:id", verifyToken, deleteQuize);
 quizeRouter.get("/getQuizeDetailbyid/:id", getQuizeDetailbyid);
 quizeRouter.patch("/setImpressins/:id", setImpressins);
-quizeRouter.get("/getTrendingQuize",verifyToken, getTrendingQuize);
+quizeRouter.get("/getTrendingQuize", verifyToken, getTrendingQuize);
+quizeRouter.put("/setAnalytics/:id", setAnalytics);
 module.exports = quizeRouter;

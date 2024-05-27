@@ -29,6 +29,10 @@ const quizeSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  analytics: {
+    type: Array,
+    required: true,
+  },
 });
 
 const Quize =  mongoose.model("Quize", quizeSchema);

@@ -1,9 +1,17 @@
 const Quize = require("../models/quiz");
 
 const createQuize = async (req, res) => {
-  const { slides, quizeName, quizeType, timer } = req.body;
+  const { slides, quizeName, quizeType, timer, quizAnalytic } = req.body;
   const userId = req.userId;
-  if (!quizeName || !quizeType || !slides || !userId || !timer) {
+  console.log(quizAnalytic);
+  if (
+    !quizeName ||
+    !quizeType ||
+    !slides ||
+    !userId ||
+    !timer ||
+    !quizAnalytic
+  ) {
     return res.status(400).send({
       message: "Allfields Are required",
     });
@@ -15,6 +23,7 @@ const createQuize = async (req, res) => {
       slides,
       userId,
       timer,
+      analytics: quizAnalytic,
     });
     const docData = await newQuize.save();
 
@@ -200,7 +209,6 @@ const setImpressins = async (req, res) => {
 //get the trending quizes quizname,impressions,created
 const getTrendingQuize = async (req, res) => {
   const userId = req.userId;
-  console.log(userId);
   try {
     const quizes = await Quize.find(
       { userId },
@@ -215,6 +223,53 @@ const getTrendingQuize = async (req, res) => {
     });
   } catch (error) {}
 };
+
+//setting up the analytics
+const setAnalytics = async (req, res) => {
+  const { id } = req.params;
+  const { cur, optionIdx } = req.body;
+  if (cur === undefined || optionIdx === undefined) {
+    return res.status(400).json({ message: "all fields are required" });
+  }
+  try {
+    const quiz = await Quize.findById(id);
+    let query;
+    if (!quiz) {
+      return res.status(400).json({ message: "quiz not found" });
+    }
+    if (quiz?.quizeType === "Q&A") {
+      if (optionIdx !== null) {
+        query = {
+          $inc: {
+            [`analytics.${cur}.attempts`]: 1,
+            [`analytics.${cur}.correctAnswer`]:
+              quiz.slides[cur].answer === optionIdx ? 1 : 0,
+          },
+        };
+      }
+    } else {
+      if (optionIdx !== null) {
+        query = {
+          $inc: {
+            [`analytics.${cur}.options.${optionIdx}.count`]: 1,
+          },
+        };
+      }
+    }
+    await Quize.findByIdAndUpdate(id, query);
+    res.send({
+      message: "updated analytics",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      
+      status: "failed",
+      message: "error in set quize Analytics ",
+    });
+  }
+};
+
 module.exports = {
   createQuize,
   getAllquizes,
@@ -225,4 +280,5 @@ module.exports = {
   getQuizeDetailbyid,
   setImpressins,
   getTrendingQuize,
+  setAnalytics,
 };
