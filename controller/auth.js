@@ -15,7 +15,7 @@ const registerUser = async (req, res) => {
 
   const isExist = await user.findOne({ email });
   if (isExist) {
-    return res.status(400).send({
+    return res.send({
       message: "user Already exist",
       status: 2,
     });
@@ -59,6 +59,7 @@ const loginUser = async (req, res) => {
       password,
       isUserExist.password
     );
+   
     if (!decryptPassword) {
       return res.status(500).send({
         message: "password error",
